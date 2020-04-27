@@ -1,6 +1,7 @@
 #from scipy.interpolate import spline
 import os
 import numpy as np
+import matplotlib.pyplot as plt
 
 def lin_interp(indeps,deps,spec_indep):
     for ind,indep in enumerate(indeps):
@@ -186,6 +187,14 @@ class TestData:
         with open(out_filename, 'w') as results_out:
             results_out.write("X(mm),Z(mm),Vx(mm/s),Vy(mm/s),Vz(mm/s),P(Pa),P0(Pa),T(K)\n")
 
+            X = []
+            Y = []
+            Z = []
+            u = []
+            v = []
+            w = []
+            
+            
             for point in self.test_points:
 
                 Vx = np.sin(point.yaw * (np.pi / 180.0)) * np.cos(point.pitch * (np.pi / 180.0)) * point.vel
@@ -199,15 +208,37 @@ class TestData:
                 if np.iscomplex(Vz):
                     Vz = 0.0
 
+
+                
+                X.append(point.x)
+                Y.append(0.0)
+                Z.append(point.z)
+                u.append(Vz)
+                v.append(Vy)
+                w.append(-Vx)
+
+                
+                
                 results_out.write(
                     "{},{},{},{},{},{},{},{}\n".format(point.x, point.z, Vx * 304.8, Vy * 304.8, Vz * 304.8,
                                                        point.Pstatic * 6894.76, point.Ptotal * 6894.76, 293.0))
+
+            fig = plt.figure()
+            ax = fig.gca(projection='3d')
+            ax.quiver(X,Y,Z,u,v,w,arrow_length_ratio=0.1)
+            ax.set_xlim3d(0,300)
+            ax.set_zlim3d(0,300)
+            ax.set_xlabel("x")
+            ax.set_ylabel("y")
+            ax.set_zlabel("z")
+            ax.set_ylim3d(0,1000)
+            plt.show()
 
 
 if __name__ =="__main__":
 
     calibration_filename = r"C:\Users\jjbet\Desktop\CalibrationCurves\Condensed_FCalibData.csv"
-    results_filename = r"E:\Results\CenterFlap_30Deg_TEUP.csv"
+    results_filename = r"E:\Results\CenterFlap_0Deg.csv"
 
     sample_calibration = CalibData(calibration_filename)
 
